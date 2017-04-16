@@ -1,4 +1,4 @@
-package br.univel.jshare.model.tabelas;
+package br.univel.jshare.model.tabela;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +40,15 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 		for (Cliente cliente : list) {
 
 			for (Arquivo arquivo : dados.get(cliente)) {
-				matrix[lista][0] = cliente.getId();
-				matrix[lista][1] = cliente.getNome();
-				matrix[lista][2] = cliente.getIp();
-				matrix[lista][3] = arquivo.getId();
-				matrix[lista][4] = arquivo.getNome();
-				matrix[lista][5] = arquivo.getExtensao();
-				matrix[lista][6] = arquivo.getTamanho();				
-				matrix[lista][7] = arquivo;
-				matrix[lista][8] = cliente;
+				matrix[lista][0] = cliente.getNome();
+				matrix[lista][1] = cliente.getIp();
+				matrix[lista][2] = arquivo.getId();
+				matrix[lista][3] = arquivo.getNome();
+				matrix[lista][4] = arquivo.getExtensao();
+				matrix[lista][5] = arquivo.getTamanho();				
+				matrix[lista][6] = arquivo;
+				matrix[lista][7] = cliente;
+				matrix[lista][8] = cliente.getId();
 				lista++;
 			}
 		}
@@ -56,7 +56,7 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 7;
+		return 6;
 	}
 
 	@Override
@@ -87,18 +87,16 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 	public String getColumnName(int column) {
 		switch (column) {
 			case 0:
-				return "IDC"; 
-			case 1:
 				return "CLIENTE"; 
+			case 1:
+				return "IP CLIENTE"; 
 			case 2:
-				return "IPC";
+				return "ID ARQUIVO";
 			case 3:
-				return "IDA"; 
-			case 4:
 				return "ARQUIVO"; 
-			case 5:
+			case 4:
 				return "EXTENSAO"; 
-			case 6:
+			case 5:
 				return "TAMANHO"; 
 			default:
 				return super.getColumnName(column);

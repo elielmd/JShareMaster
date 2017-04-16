@@ -1,4 +1,4 @@
-package br.univel.jshare.model;
+package br.univel.jshare.model.util;
 
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;

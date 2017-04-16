@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import br.univel.jshare.PrincipalJShareMaster;
 import br.univel.jshare.comum.Arquivo;
 import br.univel.jshare.comum.Cliente;
 import br.univel.jshare.comum.IServer;
 import br.univel.jshare.comum.TipoFiltro;
-import br.univel.jshare.model.LeituraEscritaDeArquivos;
-import br.univel.jshare.view.PrincipalJShareMaster;
+import br.univel.jshare.model.arquivo.LeituraEscritaDeArquivos;
 
 public class ServidorJMaster implements IServer {
 
@@ -81,7 +81,7 @@ public class ServidorJMaster implements IServer {
 	public void desconectar(Cliente c) throws RemoteException {
 		listaClientes.remove(c);
 		mapArquivos.remove(c);
-		principalJShareMaster.mostrar(c.getNome().concat(" se desconectou do JShare."));
+		principalJShareMaster.mostrar(c.getNome().concat(" se desconectou do JShareMaster."));
 	}
 
 	private void inicializaServerRMI() throws RemoteException {

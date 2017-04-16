@@ -1,4 +1,4 @@
-package br.univel.jshare.model;
+package br.univel.jshare.model.diretorio;
 
 import java.io.File;
 import java.util.ArrayList;

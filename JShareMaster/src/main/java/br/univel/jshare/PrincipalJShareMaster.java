@@ -1,4 +1,4 @@
-package br.univel.jshare.view;
+package br.univel.jshare;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,13 +50,13 @@ import br.univel.jshare.comum.Arquivo;
 import br.univel.jshare.comum.Cliente;
 import br.univel.jshare.comum.IServer;
 import br.univel.jshare.comum.TipoFiltro;
-import br.univel.jshare.model.JNumberField;
-import br.univel.jshare.model.LeituraEscritaDeArquivos;
-import br.univel.jshare.model.LerIp;
-import br.univel.jshare.model.ListarDiretoriosArquivos;
+import br.univel.jshare.model.arquivo.LeituraEscritaDeArquivos;
 import br.univel.jshare.model.criptografia.Md5Util;
+import br.univel.jshare.model.diretorio.ListarDiretoriosArquivos;
 import br.univel.jshare.model.servidor.ServidorJMaster;
-import br.univel.jshare.model.tabelas.ModeloArquivos;
+import br.univel.jshare.model.tabela.ModeloArquivos;
+import br.univel.jshare.model.util.JNumberField;
+import br.univel.jshare.model.util.LerIp;
 
 public class PrincipalJShareMaster extends JFrame {
 
@@ -77,11 +77,12 @@ public class PrincipalJShareMaster extends JFrame {
 	private JButton btnConectar;
 	private JTextArea textArea;
 	private JTextField tfValorBusca;
-	private JTable tabelaArquivos;
 	private ServidorJMaster servidor;
 	private Registry registry;
 	private IServer iServer;
 	public static final String PASTA = "C:/Shared/";
+	private JTable tabelaArquivos;
+	private JScrollPane scrollPaneArq;
 
 	/**
 	 * Launch the application.
@@ -120,7 +121,7 @@ public class PrincipalJShareMaster extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage("src\\readicon.png"));
 		setTitle("JShareMaster");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 900, 600);
+		setBounds(100, 100, 930, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -161,117 +162,121 @@ public class PrincipalJShareMaster extends JFrame {
 		lblNewLabel.setIcon(new ImageIcon("src\\fileshare.png"));
 		panel_5.add(lblNewLabel, BorderLayout.CENTER);
 
-		JPanel panel_3 = new JPanel();
-		panel_3.setBorder(new TitledBorder(null, "Funcionamento", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		GridBagConstraints gbc_panel_3 = new GridBagConstraints();
-		gbc_panel_3.gridwidth = 2;
-		gbc_panel_3.insets = new Insets(5, 0, 5, 0);
-		gbc_panel_3.fill = GridBagConstraints.BOTH;
-		gbc_panel_3.gridx = 1;
-		gbc_panel_3.gridy = 0;
-		panelConexao.add(panel_3, gbc_panel_3);
-		GridBagLayout gbl_panel_3 = new GridBagLayout();
-		gbl_panel_3.columnWidths = new int[] { 0, 0, 0 };
-		gbl_panel_3.rowHeights = new int[] { 0, 0 };
-		gbl_panel_3.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
-		gbl_panel_3.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-		panel_3.setLayout(gbl_panel_3);
+		JPanel panelTipoStart = new JPanel();
+		panelTipoStart
+				.setBorder(new TitledBorder(null, "Funcionamento", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		GridBagConstraints gbc_panelTipoStart = new GridBagConstraints();
+		gbc_panelTipoStart.gridwidth = 2;
+		gbc_panelTipoStart.insets = new Insets(5, 0, 5, 0);
+		gbc_panelTipoStart.fill = GridBagConstraints.BOTH;
+		gbc_panelTipoStart.gridx = 1;
+		gbc_panelTipoStart.gridy = 0;
+		panelConexao.add(panelTipoStart, gbc_panelTipoStart);
+		GridBagLayout gbl_panelTipoStart = new GridBagLayout();
+		gbl_panelTipoStart.columnWidths = new int[] { 0, 0, 0 };
+		gbl_panelTipoStart.rowHeights = new int[] { 0, 0 };
+		gbl_panelTipoStart.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gbl_panelTipoStart.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+		panelTipoStart.setLayout(gbl_panelTipoStart);
 
 		rdbtnCliente = new JRadioButton("Apenas Cliente");
-		rdbtnCliente.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		rdbtnCliente.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		GridBagConstraints gbc_rdbtnCliente = new GridBagConstraints();
 		gbc_rdbtnCliente.anchor = GridBagConstraints.WEST;
 		gbc_rdbtnCliente.gridx = 1;
 		gbc_rdbtnCliente.gridy = 0;
-		panel_3.add(rdbtnCliente, gbc_rdbtnCliente);
+		panelTipoStart.add(rdbtnCliente, gbc_rdbtnCliente);
 
 		rdbtnServidor = new JRadioButton("Servidor e Cliente");
-		rdbtnServidor.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		rdbtnServidor.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		rdbtnServidor.setSelected(true);
 		GridBagConstraints gbc_rdbtnServidor = new GridBagConstraints();
 		gbc_rdbtnServidor.insets = new Insets(0, 0, 0, 5);
 		gbc_rdbtnServidor.gridx = 0;
 		gbc_rdbtnServidor.gridy = 0;
-		panel_3.add(rdbtnServidor, gbc_rdbtnServidor);
+		panelTipoStart.add(rdbtnServidor, gbc_rdbtnServidor);
 
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(rdbtnServidor);
 		bg.add(rdbtnCliente);
 
-		JPanel panel_4 = new JPanel();
-		panel_4.setBorder(
+		JPanel panelParametros = new JPanel();
+		panelParametros.setBorder(
 				new TitledBorder(null, "Par\u00E2metros", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		GridBagConstraints gbc_panel_4 = new GridBagConstraints();
-		gbc_panel_4.gridwidth = 2;
-		gbc_panel_4.insets = new Insets(0, 0, 5, 0);
-		gbc_panel_4.fill = GridBagConstraints.BOTH;
-		gbc_panel_4.gridx = 1;
-		gbc_panel_4.gridy = 1;
-		panelConexao.add(panel_4, gbc_panel_4);
-		GridBagLayout gbl_panel_4 = new GridBagLayout();
-		gbl_panel_4.columnWidths = new int[] { 0, 0, 0, 0, 0 };
-		gbl_panel_4.rowHeights = new int[] { 0, 0, 0, 0 };
-		gbl_panel_4.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		panel_4.setLayout(gbl_panel_4);
+		GridBagConstraints gbc_panelParametros = new GridBagConstraints();
+		gbc_panelParametros.gridwidth = 2;
+		gbc_panelParametros.insets = new Insets(0, 0, 5, 0);
+		gbc_panelParametros.fill = GridBagConstraints.BOTH;
+		gbc_panelParametros.gridx = 1;
+		gbc_panelParametros.gridy = 1;
+		panelConexao.add(panelParametros, gbc_panelParametros);
+		GridBagLayout gbl_panelParametros = new GridBagLayout();
+		gbl_panelParametros.columnWidths = new int[] { 0, 0, 0, 0, 0 };
+		gbl_panelParametros.rowHeights = new int[] { 0, 0, 0, 0 };
+		gbl_panelParametros.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panelParametros.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		panelParametros.setLayout(gbl_panelParametros);
 
 		JLabel lbNome = new JLabel("Nome");
+		lbNome.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		GridBagConstraints gbc_lbNome = new GridBagConstraints();
 		gbc_lbNome.insets = new Insets(0, 0, 5, 5);
 		gbc_lbNome.anchor = GridBagConstraints.EAST;
 		gbc_lbNome.gridx = 0;
 		gbc_lbNome.gridy = 0;
-		panel_4.add(lbNome, gbc_lbNome);
+		panelParametros.add(lbNome, gbc_lbNome);
 
 		tfNome = new JTextField();
-		tfNome.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		tfNome.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		GridBagConstraints gbc_tfNome = new GridBagConstraints();
 		gbc_tfNome.gridwidth = 3;
 		gbc_tfNome.insets = new Insets(0, 0, 5, 0);
 		gbc_tfNome.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tfNome.gridx = 1;
 		gbc_tfNome.gridy = 0;
-		panel_4.add(tfNome, gbc_tfNome);
+		panelParametros.add(tfNome, gbc_tfNome);
 		tfNome.setColumns(10);
 
 		JLabel tfEndereco = new JLabel("Endereço");
+		tfEndereco.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		GridBagConstraints gbc_tfEndereco = new GridBagConstraints();
 		gbc_tfEndereco.insets = new Insets(0, 0, 5, 5);
 		gbc_tfEndereco.anchor = GridBagConstraints.EAST;
 		gbc_tfEndereco.gridx = 0;
 		gbc_tfEndereco.gridy = 1;
-		panel_4.add(tfEndereco, gbc_tfEndereco);
+		panelParametros.add(tfEndereco, gbc_tfEndereco);
 
 		tfIp = new JTextField();
-		tfIp.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		tfIp.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		GridBagConstraints gbc_tfIp = new GridBagConstraints();
 		gbc_tfIp.insets = new Insets(0, 0, 5, 5);
 		gbc_tfIp.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tfIp.gridx = 1;
 		gbc_tfIp.gridy = 1;
-		panel_4.add(tfIp, gbc_tfIp);
+		panelParametros.add(tfIp, gbc_tfIp);
 		tfIp.setColumns(10);
 
 		JLabel lbPorta = new JLabel("Porta");
+		lbPorta.setFont(new Font("Dialog", Font.PLAIN, 15));
 		GridBagConstraints gbc_lbPorta = new GridBagConstraints();
 		gbc_lbPorta.insets = new Insets(0, 0, 5, 5);
 		gbc_lbPorta.anchor = GridBagConstraints.EAST;
 		gbc_lbPorta.gridx = 2;
 		gbc_lbPorta.gridy = 1;
-		panel_4.add(lbPorta, gbc_lbPorta);
+		panelParametros.add(lbPorta, gbc_lbPorta);
 
 		tfPorta = new JNumberField();
-		tfPorta.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		tfPorta.setFont(new Font("Dialog", Font.PLAIN, 15));
 		GridBagConstraints gbc_tfPorta = new GridBagConstraints();
 		gbc_tfPorta.insets = new Insets(0, 0, 5, 0);
 		gbc_tfPorta.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tfPorta.gridx = 3;
 		gbc_tfPorta.gridy = 1;
-		panel_4.add(tfPorta, gbc_tfPorta);
+		panelParametros.add(tfPorta, gbc_tfPorta);
 		tfPorta.setColumns(10);
 
 		btnDesconectar = new JButton("Desconectar");
-		btnDesconectar.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		btnDesconectar.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		GridBagConstraints gbc_btnDesconectar = new GridBagConstraints();
 		gbc_btnDesconectar.anchor = GridBagConstraints.NORTH;
 		gbc_btnDesconectar.insets = new Insets(0, 0, 0, 5);
@@ -285,7 +290,7 @@ public class PrincipalJShareMaster extends JFrame {
 		});
 
 		btnConectar = new JButton("Conectar");
-		btnConectar.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		btnConectar.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		GridBagConstraints gbc_btnConectar = new GridBagConstraints();
 		gbc_btnConectar.anchor = GridBagConstraints.NORTH;
 		gbc_btnConectar.gridx = 2;
@@ -300,23 +305,23 @@ public class PrincipalJShareMaster extends JFrame {
 		JPanel panelBusca = new JPanel();
 		tabbedPane.addTab("Busca", new ImageIcon("src\\search.png"), panelBusca, null);
 		GridBagLayout gbl_panelBusca = new GridBagLayout();
-		gbl_panelBusca.columnWidths = new int[] { 328, 10, 0 };
+		gbl_panelBusca.columnWidths = new int[] { 328, 0, 10, 0 };
 		gbl_panelBusca.rowHeights = new int[] { 10, 0, 0, 0, 0 };
-		gbl_panelBusca.columnWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
-		gbl_panelBusca.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gbl_panelBusca.columnWeights = new double[] { 1.0, 0.0, 1.0, Double.MIN_VALUE };
+		gbl_panelBusca.rowWeights = new double[] { 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
 		panelBusca.setLayout(gbl_panelBusca);
 
 		JPanel panel_6 = new JPanel();
 		GridBagConstraints gbc_panel_6 = new GridBagConstraints();
 		gbc_panel_6.insets = new Insets(0, 0, 5, 0);
 		gbc_panel_6.anchor = GridBagConstraints.NORTHWEST;
-		gbc_panel_6.gridx = 1;
+		gbc_panel_6.gridx = 2;
 		gbc_panel_6.gridy = 0;
 		panelBusca.add(panel_6, gbc_panel_6);
 
 		JPanel panel = new JPanel();
 		GridBagConstraints gbc_panel = new GridBagConstraints();
-		gbc_panel.gridwidth = 2;
+		gbc_panel.gridwidth = 3;
 		gbc_panel.insets = new Insets(0, 0, 5, 0);
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
@@ -324,53 +329,32 @@ public class PrincipalJShareMaster extends JFrame {
 		panelBusca.add(panel, gbc_panel);
 
 		JLabel lbBusca = new JLabel("Arquivo");
-		lbBusca.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		lbBusca.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panel.add(lbBusca);
 
 		tfBusca = new JTextField();
-		tfBusca.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		tfBusca.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panel.add(tfBusca);
 		tfBusca.setColumns(35);
 
-		JComboBox cbFiltro = new JComboBox();
-		cbFiltro.setModel(new DefaultComboBoxModel(TipoFiltro.values()));
+		JComboBox<Object> cbFiltro = new JComboBox<Object>();
+		cbFiltro.setModel(new DefaultComboBoxModel<Object>(TipoFiltro.values()));
 		cbFiltro.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		panel.add(cbFiltro);
 
 		tfValorBusca = new JTextField();
+		tfValorBusca.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panel.add(tfValorBusca);
 		tfValorBusca.setColumns(10);
 
 		JButton btnBuscar = new JButton("Buscar");
 		panel.add(btnBuscar);
 		btnBuscar.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		btnBuscar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				Map<Cliente, List<Arquivo>> arquivosDisponiveis = new HashMap<>();
-
-				TipoFiltro tipo = (TipoFiltro) cbFiltro.getSelectedItem();
-
-				try {
-					if (rdbtnServidor.isSelected()) {
-						arquivosDisponiveis = servidor.procurarArquivo(tfBusca.getText(), tipo, tfValorBusca.getText());
-					} else {
-						arquivosDisponiveis = iServer.procurarArquivo(tfBusca.getText(), tipo, tfValorBusca.getText());
-					}
-
-					listarArquivos(arquivosDisponiveis);
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
 
 		JButton btnBaixar = new JButton("Baixar");
-		GridBagConstraints gbc_btnBaixar = new GridBagConstraints();
-		gbc_btnBaixar.insets = new Insets(0, 0, 5, 5);
-		gbc_btnBaixar.gridx = 0;
-		gbc_btnBaixar.gridy = 2;
-		panelBusca.add(btnBaixar, gbc_btnBaixar);
+		btnBaixar.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		panel.add(btnBaixar);
+
 		btnBaixar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (tabelaArquivos.getRowCount() == 0) {
@@ -408,7 +392,8 @@ public class PrincipalJShareMaster extends JFrame {
 						md5Baixado = Md5Util.getMD5Checksum(arquivoBaixado.getPath());
 
 						if (md5Baixado.equals(md5Servidor)) {
-							mostrar("Arquivos conferem");
+							mostrar("Arquivo " + arquivo.getNome() + "." + arquivo.getExtensao()
+									+ " baixado com sucesso.");
 						} else {
 							mostrar("Arquivo pode estar corrompido.");
 							mostrar("MD5 do arquivo".concat(md5Baixado)
@@ -418,25 +403,52 @@ public class PrincipalJShareMaster extends JFrame {
 				}
 			}
 		});
+		btnBuscar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Map<Cliente, List<Arquivo>> arquivosDisponiveis = new HashMap<>();
 
-		JPanel panel_1 = new JPanel();
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.gridwidth = 2;
-		gbc_panel_1.fill = GridBagConstraints.BOTH;
-		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 3;
-		panelBusca.add(panel_1, gbc_panel_1);
+				TipoFiltro tipo = (TipoFiltro) cbFiltro.getSelectedItem();
 
-		JScrollPane scrollPaneArq = new JScrollPane();
-		panel_1.add(scrollPaneArq);
+				try {
+					if (rdbtnServidor.isSelected()) {
+						arquivosDisponiveis = servidor.procurarArquivo(tfBusca.getText(), tipo, tfValorBusca.getText());
+					} else {
+						arquivosDisponiveis = iServer.procurarArquivo(tfBusca.getText(), tipo, tfValorBusca.getText());
+					}
+
+					listarArquivos(arquivosDisponiveis);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 
 		tabelaArquivos = new JTable();
+		tabelaArquivos.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		GridBagConstraints gbc_tabelaArquivos = new GridBagConstraints();
+		gbc_tabelaArquivos.insets = new Insets(0, 0, 5, 0);
+		gbc_tabelaArquivos.fill = GridBagConstraints.BOTH;
+		gbc_tabelaArquivos.gridx = 1;
+		gbc_tabelaArquivos.gridy = 2;
+
+		scrollPaneArq = new JScrollPane();
+		GridBagConstraints gbc_scrollPaneArq = new GridBagConstraints();
+		gbc_scrollPaneArq.insets = new Insets(0, 0, 0, 5);
+		gbc_scrollPaneArq.gridheight = 2;
+		gbc_scrollPaneArq.gridwidth = 3;
+		gbc_scrollPaneArq.fill = GridBagConstraints.BOTH;
+		gbc_scrollPaneArq.gridx = 0;
+		gbc_scrollPaneArq.gridy = 2;
+		panelBusca.add(scrollPaneArq, gbc_scrollPaneArq);
+
 		scrollPaneArq.setViewportView(tabelaArquivos);
 
 		JScrollPane scrollPane = new JScrollPane();
 		splitPane.setRightComponent(scrollPane);
 
 		textArea = new JTextArea();
+		textArea.setFont(new Font("Monospaced", Font.BOLD, 15));
 		textArea.setForeground(new Color(50, 205, 50));
 		textArea.setBackground(Color.BLACK);
 		scrollPane.setViewportView(textArea);
@@ -464,7 +476,6 @@ public class PrincipalJShareMaster extends JFrame {
 		if (iServer != null) {
 			try {
 				iServer.desconectar(cliente);
-				UnicastRemoteObject.unexportObject(iServer, true);
 			} catch (NoSuchObjectException e) {
 				e.printStackTrace();
 			} catch (RemoteException e) {
@@ -527,6 +538,34 @@ public class PrincipalJShareMaster extends JFrame {
 				e.printStackTrace();
 			}
 		}
+
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					while (!btnConectar.isEnabled()) {
+						List<Arquivo> listaArq = ListarDiretoriosArquivos.listarArquivos(new File(PASTA));
+						if (rdbtnServidor.isSelected()) {
+							servidor.publicarListaArquivos(cliente, listaArq);
+						} else {
+							iServer.publicarListaArquivos(cliente, listaArq);
+						}
+
+						try {
+							currentThread();
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+
+			}
+		};
+
+		thread.start();
 
 		btnConectar.setEnabled(false);
 		btnDesconectar.setEnabled(true);
