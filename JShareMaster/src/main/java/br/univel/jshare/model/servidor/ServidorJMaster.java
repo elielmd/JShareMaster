@@ -118,9 +118,53 @@ public class ServidorJMaster implements IServer {
 	}
 
 	@Override
-	public Map<Cliente, List<Arquivo>> procurarArquivo(String query, TipoFiltro tipoFiltro, String filtro)
-			throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<Cliente, List<Arquivo>> procurarArquivo(String query, TipoFiltro tipoFiltro, String filtroPesquisa) {
+		Map<Cliente, List<Arquivo>> map = new HashMap<>();
+		query = query.toUpperCase();
+		filtroPesquisa = filtroPesquisa.toUpperCase();
+
+		for (Cliente cliente : listaClientes) {
+
+			List<Arquivo> listaArquivos = new ArrayList<>();
+
+			for (Arquivo arquivo : mapArquivos.get(cliente)) {
+
+				if ((query.isEmpty()) || (arquivo.getNome().toUpperCase().contains(query))) {
+
+					switch (tipoFiltro) {
+					case EXTENSAO:
+						if ((filtroPesquisa.isEmpty()) || (arquivo.getExtensao().toUpperCase().contains(filtroPesquisa))) {
+							listaArquivos.add(arquivo);
+						}
+						break;
+
+					case TAMANHO_MAX:
+						if ((filtroPesquisa.isEmpty())
+								|| (arquivo.getTamanho() <= (Integer.parseInt(filtroPesquisa) * 1024))) {
+							listaArquivos.add(arquivo);
+						}
+						break;
+					case TAMANHO_MIN:
+						if ((filtroPesquisa.isEmpty())
+								|| (arquivo.getTamanho() >= (Integer.parseInt(filtroPesquisa) * 1024))) {
+							listaArquivos.add(arquivo);
+						}
+						break;
+
+					default:
+						listaArquivos.add(arquivo);
+						break;
+					}
+				}
+
+			}
+
+			if (listaArquivos.size() > 0) {
+				map.put(cliente, listaArquivos);
+
+			}
+		}
+
+		return map;
 	}
 }

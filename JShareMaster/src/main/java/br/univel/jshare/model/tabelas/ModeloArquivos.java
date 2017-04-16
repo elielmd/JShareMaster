@@ -29,7 +29,7 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 			}
 		}
 
-		matrix = new Object[tCliente][6];
+		matrix = new Object[tCliente][9];
 
 		List<Cliente> list = new ArrayList<>(dados.keySet());
 
@@ -42,10 +42,13 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 			for (Arquivo arquivo : dados.get(cliente)) {
 				matrix[lista][0] = cliente.getId();
 				matrix[lista][1] = cliente.getNome();
-				matrix[lista][2] = arquivo.getId();
-				matrix[lista][3] = arquivo.getNome();
-				matrix[lista][4] = arquivo;
-				matrix[lista][5] = cliente;
+				matrix[lista][2] = cliente.getIp();
+				matrix[lista][3] = arquivo.getId();
+				matrix[lista][4] = arquivo.getNome();
+				matrix[lista][5] = arquivo.getExtensao();
+				matrix[lista][6] = arquivo.getTamanho();				
+				matrix[lista][7] = arquivo;
+				matrix[lista][8] = cliente;
 				lista++;
 			}
 		}
@@ -53,7 +56,7 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 5;
+		return 7;
 	}
 
 	@Override
@@ -67,11 +70,39 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 	}
 
 	public Cliente getCliente(int row) {
-		return (Cliente) matrix[row][3];
+		return (Cliente) matrix[row][8];
 	}
 
 	public Arquivo getArquivo(int row) {
-		return (Arquivo) matrix[row][2];
+		return (Arquivo) matrix[row][7];
 	}
+	
+	public Arquivo getMeuItem(int row) {
+		Arquivo arquivo = new Arquivo();
+		arquivo.setId(row);
+		return arquivo;
+	}
+	
+	@Override
+	public String getColumnName(int column) {
+		switch (column) {
+			case 0:
+				return "IDC"; 
+			case 1:
+				return "CLIENTE"; 
+			case 2:
+				return "IPC";
+			case 3:
+				return "IDA"; 
+			case 4:
+				return "ARQUIVO"; 
+			case 5:
+				return "EXTENSAO"; 
+			case 6:
+				return "TAMANHO"; 
+			default:
+				return super.getColumnName(column);
+		}
+	}	
 
 }

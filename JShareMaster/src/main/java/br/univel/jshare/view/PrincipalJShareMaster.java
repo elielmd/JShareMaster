@@ -30,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -50,8 +51,10 @@ import br.univel.jshare.comum.Cliente;
 import br.univel.jshare.comum.IServer;
 import br.univel.jshare.comum.TipoFiltro;
 import br.univel.jshare.model.JNumberField;
+import br.univel.jshare.model.LeituraEscritaDeArquivos;
 import br.univel.jshare.model.LerIp;
 import br.univel.jshare.model.ListarDiretoriosArquivos;
+import br.univel.jshare.model.criptografia.Md5Util;
 import br.univel.jshare.model.servidor.ServidorJMaster;
 import br.univel.jshare.model.tabelas.ModeloArquivos;
 
@@ -115,7 +118,7 @@ public class PrincipalJShareMaster extends JFrame {
 	 */
 	public PrincipalJShareMaster() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage("src\\readicon.png"));
-		setTitle("MofoShare");
+		setTitle("JShareMaster");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 900, 600);
 		contentPane = new JPanel();
@@ -362,13 +365,66 @@ public class PrincipalJShareMaster extends JFrame {
 			}
 		});
 
+		JButton btnBaixar = new JButton("Baixar");
+		GridBagConstraints gbc_btnBaixar = new GridBagConstraints();
+		gbc_btnBaixar.insets = new Insets(0, 0, 5, 5);
+		gbc_btnBaixar.gridx = 0;
+		gbc_btnBaixar.gridy = 2;
+		panelBusca.add(btnBaixar, gbc_btnBaixar);
+		btnBaixar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (tabelaArquivos.getRowCount() == 0) {
+					JOptionPane.showMessageDialog(null, "Nenhum registro para ser baixado", "Aviso",
+							JOptionPane.WARNING_MESSAGE);
+				} else {
+					if (tabelaArquivos.getSelectedRow() == -1) {
+						JOptionPane.showMessageDialog(null, "Nenhum arquivo foi selecionado", "Aviso",
+								JOptionPane.WARNING_MESSAGE);
+					} else {
+						byte[] bytesRegistro = null;
+
+						Cliente cliente = ((ModeloArquivos) tabelaArquivos.getModel())
+								.getCliente(tabelaArquivos.getSelectedRow());
+						Arquivo arquivo = ((ModeloArquivos) tabelaArquivos.getModel())
+								.getArquivo(tabelaArquivos.getSelectedRow());
+						File arquivoBaixado = new File(
+								PASTA + "Copia" + arquivo.getNome().concat(".").concat(arquivo.getExtensao()));
+						IServer fileServer = null;
+						String md5Servidor = arquivo.getMd5();
+						String md5Baixado = "";
+
+						try {
+							Registry registry = LocateRegistry.getRegistry(cliente.getIp(), cliente.getPorta());
+							fileServer = (IServer) registry.lookup(IServer.NOME_SERVICO);
+							bytesRegistro = fileServer.baixarArquivo(cliente, arquivo);
+							LeituraEscritaDeArquivos arq = new LeituraEscritaDeArquivos();
+
+							arq.escreva(arquivoBaixado, bytesRegistro);
+
+						} catch (RemoteException | NotBoundException e) {
+							e.printStackTrace();
+						}
+
+						md5Baixado = Md5Util.getMD5Checksum(arquivoBaixado.getPath());
+
+						if (md5Baixado.equals(md5Servidor)) {
+							mostrar("Arquivos conferem");
+						} else {
+							mostrar("Arquivo pode estar corrompido.");
+							mostrar("MD5 do arquivo".concat(md5Baixado)
+									+ "MD5 do arquivo no servidor = ".concat(md5Servidor));
+						}
+					}
+				}
+			}
+		});
+
 		JPanel panel_1 = new JPanel();
 		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.gridheight = 2;
 		gbc_panel_1.gridwidth = 2;
 		gbc_panel_1.fill = GridBagConstraints.BOTH;
 		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 2;
+		gbc_panel_1.gridy = 3;
 		panelBusca.add(panel_1, gbc_panel_1);
 
 		JScrollPane scrollPaneArq = new JScrollPane();
@@ -434,7 +490,6 @@ public class PrincipalJShareMaster extends JFrame {
 
 	protected void conectarNoServidor() {
 		cliente = new Cliente();
-		cliente.setId(1);
 		cliente.setIp(LerIp.meuIp());
 		cliente.setNome(tfNome.getText());
 		cliente.setPorta(tfPorta.getNumber());
