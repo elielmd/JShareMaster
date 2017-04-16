@@ -38,14 +38,14 @@ public class ServidorJMaster implements IServer {
 	}
 
 	public String serverToString() {
-		return "Servidor IP: " + this.ipServidor + " | PORTA: " + this.portaServidor.toString();
+		return "servidor 'IP: " + this.ipServidor + " | PORTA: " + this.portaServidor.toString();
 	}
 
 	@Override
 	public void registrarCliente(Cliente c) throws RemoteException {
 		listaClientes.add(c);
-		principalJShareMaster.mostrar(c.getNome() + "(" + c.getIp() + " - " + c.getPorta() + ")"
-				+ " se conectou " + serverToString() + ".");
+		principalJShareMaster.mostrar(c.getNome() + " 'IP: " + c.getIp() + " | PORTA: " + c.getPorta() + "'"
+				+ " conectou no " + serverToString() + ".");
 	}
 
 	@Override
@@ -54,14 +54,12 @@ public class ServidorJMaster implements IServer {
 
 		principalJShareMaster.mostrar(c.getNome().concat(" publicou sua lista de arquivos."));
 		principalJShareMaster.mostrar("Arquivos disponiveis:");
-		for (Arquivo arq : lista) {
-			principalJShareMaster.mostrar("\t" + arq.getNome().concat(".").concat(arq.getExtensao()));
+		for (Arquivo arquivo : lista) {
+			principalJShareMaster.mostrar("\t" + arquivo.getNome().concat(".").concat(arquivo.getExtensao()));
 		}
 
 		principalJShareMaster.listarArquivos(mapArquivos);
 	}
-
-	
 
 	@Override
 	public byte[] baixarArquivo(Cliente cli, Arquivo arq) throws RemoteException {
@@ -70,8 +68,8 @@ public class ServidorJMaster implements IServer {
 				+ "' esta baixando o arquivo '".concat(arq.getNome()).concat("'.").concat(arq.getExtensao()));
 		byte[] dados = null;
 
-		LeituraEscritaDeArquivos io = new LeituraEscritaDeArquivos();
-		dados = io
+		LeituraEscritaDeArquivos ioArq = new LeituraEscritaDeArquivos();
+		dados = ioArq
 				.leia(new File(arq.getPath().concat("\\").concat(arq.getNome()).concat(".").concat(arq.getExtensao())));
 
 		principalJShareMaster.mostrar("Cliente '" + cli.getNome()

@@ -12,6 +12,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.File;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Map;
 
@@ -38,8 +43,10 @@ import javax.swing.border.TitledBorder;
 
 import br.univel.jshare.comum.Arquivo;
 import br.univel.jshare.comum.Cliente;
+import br.univel.jshare.comum.IServer;
 import br.univel.jshare.model.JNumberField;
 import br.univel.jshare.model.LerIp;
+import br.univel.jshare.model.ListarDiretoriosArquivos;
 import br.univel.jshare.model.servidor.ServidorJMaster;
 import br.univel.jshare.model.tabelas.ModeloArquivos;
 
@@ -64,6 +71,9 @@ public class PrincipalJShareMaster extends JFrame {
 	private JTextField textField_1;
 	private JTable tabelaArquivos;
 	private ServidorJMaster servidor;
+	private Registry registry;
+	private IServer iServer;
+	public static final String PASTA = "C:/Shared/";
 
 	/**
 	 * Launch the application.
@@ -102,7 +112,7 @@ public class PrincipalJShareMaster extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage("src\\readicon.png"));
 		setTitle("MofoShare");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 650);
+		setBounds(100, 100, 900, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -383,6 +393,36 @@ public class PrincipalJShareMaster extends JFrame {
 		cliente.setPorta(tfPorta.getNumber());
 
 		servidor = new ServidorJMaster(getPrincipalJShareMaster(), cliente.getIp(), cliente.getPorta());
+
+		if (rdbtnCliente.isSelected()) {
+			try {
+				try {
+					registry = LocateRegistry.getRegistry(tfIp.getText(), tfPorta.getNumber());
+					iServer = (IServer) registry.lookup(IServer.NOME_SERVICO);
+				} catch (RemoteException | NotBoundException e) {
+					e.printStackTrace();
+				}
+				iServer.registrarCliente(cliente);
+				File pastaArquivo = new File(PASTA);
+				if (!pastaArquivo.exists()) {
+					pastaArquivo.mkdir();
+				}
+
+				List<Arquivo> lista = ListarDiretoriosArquivos.listarArquivos(pastaArquivo);
+				
+				iServer.publicarListaArquivos(cliente, lista);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				servidor.registrarCliente(cliente);
+				List<Arquivo> lista = ListarDiretoriosArquivos.listarArquivos(new File("Share"));
+				servidor.publicarListaArquivos(cliente, lista);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
 
 		btnConectar.setEnabled(false);
 		btnDesconectar.setEnabled(true);
