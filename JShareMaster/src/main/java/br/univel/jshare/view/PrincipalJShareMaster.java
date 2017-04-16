@@ -13,14 +13,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -44,6 +48,7 @@ import javax.swing.border.TitledBorder;
 import br.univel.jshare.comum.Arquivo;
 import br.univel.jshare.comum.Cliente;
 import br.univel.jshare.comum.IServer;
+import br.univel.jshare.comum.TipoFiltro;
 import br.univel.jshare.model.JNumberField;
 import br.univel.jshare.model.LerIp;
 import br.univel.jshare.model.ListarDiretoriosArquivos;
@@ -62,13 +67,13 @@ public class PrincipalJShareMaster extends JFrame {
 	private JTextField tfNome;
 	private JSplitPane splitPane;
 	private Cliente cliente;
-	private JTextField textField;
+	private JTextField tfBusca;
 	private JRadioButton rdbtnCliente;
 	private JRadioButton rdbtnServidor;
 	private JButton btnDesconectar;
 	private JButton btnConectar;
 	private JTextArea textArea;
-	private JTextField textField_1;
+	private JTextField tfValorBusca;
 	private JTable tabelaArquivos;
 	private ServidorJMaster servidor;
 	private Registry registry;
@@ -295,7 +300,7 @@ public class PrincipalJShareMaster extends JFrame {
 		gbl_panelBusca.columnWidths = new int[] { 328, 10, 0 };
 		gbl_panelBusca.rowHeights = new int[] { 10, 0, 0, 0, 0 };
 		gbl_panelBusca.columnWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
-		gbl_panelBusca.rowWeights = new double[] { 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
+		gbl_panelBusca.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		panelBusca.setLayout(gbl_panelBusca);
 
 		JPanel panel_6 = new JPanel();
@@ -319,22 +324,43 @@ public class PrincipalJShareMaster extends JFrame {
 		lbBusca.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		panel.add(lbBusca);
 
-		textField = new JTextField();
-		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		panel.add(textField);
-		textField.setColumns(35);
+		tfBusca = new JTextField();
+		tfBusca.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		panel.add(tfBusca);
+		tfBusca.setColumns(35);
 
 		JComboBox cbFiltro = new JComboBox();
+		cbFiltro.setModel(new DefaultComboBoxModel(TipoFiltro.values()));
 		cbFiltro.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		panel.add(cbFiltro);
 
-		textField_1 = new JTextField();
-		panel.add(textField_1);
-		textField_1.setColumns(10);
+		tfValorBusca = new JTextField();
+		panel.add(tfValorBusca);
+		tfValorBusca.setColumns(10);
 
-		JButton btnNewButton = new JButton("Buscar");
-		panel.add(btnNewButton);
-		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		JButton btnBuscar = new JButton("Buscar");
+		panel.add(btnBuscar);
+		btnBuscar.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		btnBuscar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Map<Cliente, List<Arquivo>> arquivosDisponiveis = new HashMap<>();
+
+				TipoFiltro tipo = (TipoFiltro) cbFiltro.getSelectedItem();
+
+				try {
+					if (rdbtnServidor.isSelected()) {
+						arquivosDisponiveis = servidor.procurarArquivo(tfBusca.getText(), tipo, tfValorBusca.getText());
+					} else {
+						arquivosDisponiveis = iServer.procurarArquivo(tfBusca.getText(), tipo, tfValorBusca.getText());
+					}
+
+					listarArquivos(arquivosDisponiveis);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 
 		JPanel panel_1 = new JPanel();
 		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
@@ -350,9 +376,6 @@ public class PrincipalJShareMaster extends JFrame {
 
 		tabelaArquivos = new JTable();
 		scrollPaneArq.setViewportView(tabelaArquivos);
-
-		JPanel panelTransferencia = new JPanel();
-		tabbedPane.addTab("Transferências", new ImageIcon("src\\download.png"), panelTransferencia, null);
 
 		JScrollPane scrollPane = new JScrollPane();
 		splitPane.setRightComponent(scrollPane);
@@ -381,7 +404,31 @@ public class PrincipalJShareMaster extends JFrame {
 	}
 
 	protected void desconectarDoServidor() {
-		// TODO Auto-generated method stub
+		mostrar("iniciando desconexao com o servidor");
+		if (iServer != null) {
+			try {
+				iServer.desconectar(cliente);
+				UnicastRemoteObject.unexportObject(iServer, true);
+			} catch (NoSuchObjectException e) {
+				e.printStackTrace();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+			registry = null;
+			iServer = null;
+
+		}
+
+		try {
+			UnicastRemoteObject.unexportObject(servidor, true);
+		} catch (NoSuchObjectException e) {
+			e.printStackTrace();
+		}
+		cliente = null;
+		servidor = null;
+		btnConectar.setEnabled(true);
+		btnDesconectar.setEnabled(false);
+		mostrar("Você foi desconectado.");
 
 	}
 
@@ -394,6 +441,11 @@ public class PrincipalJShareMaster extends JFrame {
 
 		servidor = new ServidorJMaster(getPrincipalJShareMaster(), cliente.getIp(), cliente.getPorta());
 
+		File pastaArquivo = new File(PASTA);
+		if (!pastaArquivo.exists()) {
+			pastaArquivo.mkdir();
+		}
+
 		if (rdbtnCliente.isSelected()) {
 			try {
 				try {
@@ -403,21 +455,18 @@ public class PrincipalJShareMaster extends JFrame {
 					e.printStackTrace();
 				}
 				iServer.registrarCliente(cliente);
-				File pastaArquivo = new File(PASTA);
-				if (!pastaArquivo.exists()) {
-					pastaArquivo.mkdir();
-				}
 
 				List<Arquivo> lista = ListarDiretoriosArquivos.listarArquivos(pastaArquivo);
-				
+
 				iServer.publicarListaArquivos(cliente, lista);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
 		} else {
 			try {
+				System.out.println("TA CERTO");
 				servidor.registrarCliente(cliente);
-				List<Arquivo> lista = ListarDiretoriosArquivos.listarArquivos(new File("Share"));
+				List<Arquivo> lista = ListarDiretoriosArquivos.listarArquivos(pastaArquivo);
 				servidor.publicarListaArquivos(cliente, lista);
 			} catch (RemoteException e) {
 				e.printStackTrace();

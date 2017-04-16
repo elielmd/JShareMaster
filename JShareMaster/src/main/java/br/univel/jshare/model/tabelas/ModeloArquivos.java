@@ -53,7 +53,7 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 2;
+		return 5;
 	}
 
 	@Override
