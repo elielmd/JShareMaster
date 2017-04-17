@@ -356,6 +356,7 @@ public class PrincipalJShareMaster extends JFrame {
 		panel.add(btnBaixar);
 
 		btnBaixar.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent arg0) {
 				if (tabelaArquivos.getRowCount() == 0) {
 					JOptionPane.showMessageDialog(null, "Nenhum registro para ser baixado", "Aviso",
@@ -367,10 +368,11 @@ public class PrincipalJShareMaster extends JFrame {
 					} else {
 						byte[] bytesRegistro = null;
 
-						Cliente cliente = ((ModeloArquivos) tabelaArquivos.getModel())
+						Cliente clienteAux = ((ModeloArquivos) tabelaArquivos.getModel())
 								.getCliente(tabelaArquivos.getSelectedRow());
 						Arquivo arquivo = ((ModeloArquivos) tabelaArquivos.getModel())
 								.getArquivo(tabelaArquivos.getSelectedRow());
+
 						File arquivoBaixado = new File(
 								PASTA + "Copia" + arquivo.getNome().concat(".").concat(arquivo.getExtensao()));
 						IServer fileServer = null;
@@ -378,7 +380,7 @@ public class PrincipalJShareMaster extends JFrame {
 						String md5Baixado = "";
 
 						try {
-							Registry registry = LocateRegistry.getRegistry(cliente.getIp(), cliente.getPorta());
+							Registry registry = LocateRegistry.getRegistry(clienteAux.getIp(), clienteAux.getPorta());
 							fileServer = (IServer) registry.lookup(IServer.NOME_SERVICO);
 							bytesRegistro = fileServer.baixarArquivo(cliente, arquivo);
 							LeituraEscritaDeArquivos arq = new LeituraEscritaDeArquivos();
@@ -396,8 +398,8 @@ public class PrincipalJShareMaster extends JFrame {
 									+ " baixado com sucesso.");
 						} else {
 							mostrar("Arquivo pode estar corrompido.");
-							mostrar("MD5 do arquivo".concat(md5Baixado)
-									+ "MD5 do arquivo no servidor = ".concat(md5Servidor));
+							mostrar("MD5 do arquivo ".concat(md5Baixado + "\n")
+									+ " -> MD5 do arquivo no servidor = ".concat(md5Servidor));
 						}
 					}
 				}
@@ -530,7 +532,6 @@ public class PrincipalJShareMaster extends JFrame {
 			}
 		} else {
 			try {
-				System.out.println("TA CERTO");
 				servidor.registrarCliente(cliente);
 				List<Arquivo> lista = ListarDiretoriosArquivos.listarArquivos(pastaArquivo);
 				servidor.publicarListaArquivos(cliente, lista);
@@ -553,7 +554,7 @@ public class PrincipalJShareMaster extends JFrame {
 
 						try {
 							currentThread();
-							Thread.sleep(10000);
+							Thread.sleep(100000);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}

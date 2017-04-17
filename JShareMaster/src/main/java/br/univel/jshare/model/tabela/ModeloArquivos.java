@@ -70,11 +70,11 @@ public class ModeloArquivos extends AbstractTableModel implements TableModel {
 	}
 
 	public Cliente getCliente(int row) {
-		return (Cliente) matrix[row][8];
+		return (Cliente) matrix[row][7];
 	}
 
 	public Arquivo getArquivo(int row) {
-		return (Arquivo) matrix[row][7];
+		return (Arquivo) matrix[row][6];
 	}
 	
 	public Arquivo getMeuItem(int row) {

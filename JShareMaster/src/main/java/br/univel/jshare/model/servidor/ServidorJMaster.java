@@ -37,15 +37,12 @@ public class ServidorJMaster implements IServer {
 		}
 	}
 
-	public String serverToString() {
-		return "servidor 'IP: " + this.ipServidor + " | PORTA: " + this.portaServidor.toString();
-	}
-
 	@Override
 	public void registrarCliente(Cliente c) throws RemoteException {
 		listaClientes.add(c);
-		principalJShareMaster.mostrar(c.getNome() + " 'IP: " + c.getIp() + " | PORTA: " + c.getPorta() + "'"
-				+ " conectou no " + serverToString() + ".");
+		principalJShareMaster
+				.mostrar(c.getNome() + " 'IP: " + c.getIp() + " | PORTA: " + c.getPorta() + "'" + " conectou no "
+						+ "servidor 'IP: " + this.ipServidor + " | PORTA: " + this.portaServidor.toString() + ".");
 	}
 
 	@Override
@@ -73,28 +70,42 @@ public class ServidorJMaster implements IServer {
 				.leia(new File(arq.getPath().concat("\\").concat(arq.getNome()).concat(".").concat(arq.getExtensao())));
 
 		principalJShareMaster.mostrar("Cliente '" + cli.getNome()
-				+ "' baixou o arquivo '".concat(arq.getNome()).concat("'.").concat(arq.getExtensao()));
+				+ "' baixou o arquivo'".concat(arq.getNome()).concat("'.").concat(arq.getExtensao()));
 		return dados;
+
 	}
 
 	@Override
 	public void desconectar(Cliente c) throws RemoteException {
-		listaClientes.remove(c);
-		mapArquivos.remove(c);
+		if (listaClientes.contains(c)) {
+			listaClientes.remove(c);
+		}
+
+		if (mapArquivos.containsKey(c)) {
+			mapArquivos.remove(c);
+		}
+
 		principalJShareMaster.mostrar(c.getNome().concat(" se desconectou do JShareMaster."));
 	}
 
 	private void inicializaServerRMI() throws RemoteException {
-		principalJShareMaster.mostrar(serverToString().concat(" iniciando..."));
-		System.setProperty("java.rmi.server.hostname", this.ipServidor);
+		try {
+			principalJShareMaster
+					.mostrar("servidor 'IP: " + this.ipServidor + " | PORTA: " + this.portaServidor + " iniciando...");
+			System.setProperty("java.rmi.server.hostname", this.ipServidor);
 
-		IServer servidor = (IServer) UnicastRemoteObject.exportObject(this, 0);
+			IServer servidor = (IServer) UnicastRemoteObject.exportObject(this, 0);
 
-		Registry registry = LocateRegistry.createRegistry(this.portaServidor);
+			Registry registry = LocateRegistry.createRegistry(this.portaServidor);
 
-		registry.rebind(IServer.NOME_SERVICO, servidor);
+			registry.rebind(IServer.NOME_SERVICO, servidor);
 
-		principalJShareMaster.mostrar(serverToString().concat(" iniciado com sucesso."));
+			principalJShareMaster.mostrar(
+					"servidor 'IP: " + this.ipServidor + " | PORTA: " + this.portaServidor + " iniciado com sucesso.");
+
+		} catch (RemoteException e) {
+			principalJShareMaster.mostrar("Erro ao iniciar servidor");
+		}
 	}
 
 	public Integer getPorta() {
@@ -133,7 +144,8 @@ public class ServidorJMaster implements IServer {
 
 					switch (tipoFiltro) {
 					case EXTENSAO:
-						if ((filtroPesquisa.isEmpty()) || (arquivo.getExtensao().toUpperCase().contains(filtroPesquisa))) {
+						if ((filtroPesquisa.isEmpty())
+								|| (arquivo.getExtensao().toUpperCase().contains(filtroPesquisa))) {
 							listaArquivos.add(arquivo);
 						}
 						break;
